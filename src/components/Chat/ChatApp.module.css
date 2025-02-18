@@ -1,0 +1,89 @@
+.container {
+  height: 100vh;
+  display: flex;
+}
+
+.sidebar {
+  background: #673ab7;
+  color: white;
+  padding: 25px;
+}
+.iconsButton{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  gap: 25px;
+  margin-top: 20px;
+  border: 1px solid #000;
+  color: #fff;
+}
+
+.profile {
+  margin-bottom: 20px;
+  width: 50px;
+  height: 50px;
+}
+
+.contacts {
+  background: #f4f4f4;
+  padding: 20px;
+  border : 1px solid #000;
+  height: 100vh;
+  overflow: scroll;
+}
+
+.chatbox {
+  height: 100vh; 
+  border:1px solid red;
+}
+
+.chatHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+}
+
+.messages {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+/* .peopleList{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: scroll;
+} */
+
+.myMessage {
+  align-self: flex-end;
+  background: #673ab7;
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+  margin: 5px 0;
+}
+
+.otherMessage {
+  align-self: flex-start;
+  background: #e0e0e0;
+  padding: 10px;
+  border-radius: 10px;
+  margin: 5px 0;
+}
+
+.chatInput {
+  display: flex;
+  align-items:center;
+  padding: 10px;
+  margin-top: 330px;
+}
+
+.noChat {
+  text-align: center;
+  margin-top: 50px;
+}
