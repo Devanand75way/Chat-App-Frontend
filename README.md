@@ -42,7 +42,7 @@ Steps
 
 Clone the repository:
 
-git clone https://github.com/yourusername/chat-app-frontend.git
+git clone https://github.com/Devanand75way/chat-app-frontend.git
 cd chat-app-frontend
 
 Install dependencies:
