@@ -51,6 +51,7 @@ export const authSlice = createSlice({
         console.log(data);
         localStorage.setItem("accessToken", data.accesstoken);
         localStorage.setItem("refreshToken", data.refreshtoken);
+        localStorage.setItem("id", data.id.toString());
         state.accessToken = data.accesstoken;
         state.refreshToken = data.refreshtoken;
         state.isAuthenticated = true;

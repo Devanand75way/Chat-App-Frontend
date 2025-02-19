@@ -4,6 +4,7 @@ import { api } from "../services/api";
 import authReducer from "./reducers/authReducers";
 import { UserListApi } from "../services/userList";
 import { groupList } from "../services/groupList";
+import { userMessages } from "../services/userMessages";
 
 const store = configureStore({
   reducer: {
@@ -11,12 +12,14 @@ const store = configureStore({
     [api.reducerPath]: api.reducer,
     [UserListApi.reducerPath]: UserListApi.reducer,
     [groupList.reducerPath]: groupList.reducer,
+    [userMessages.reducerPath]: userMessages.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .concat(api.middleware)
       .concat(UserListApi.middleware)
-      .concat(groupList.middleware),
+      .concat(groupList.middleware)
+      .concat(userMessages.middleware)
 });
 
 export type RootState = ReturnType<typeof store.getState>;

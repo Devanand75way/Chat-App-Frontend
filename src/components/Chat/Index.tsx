@@ -12,6 +12,13 @@ import {
   TextField,
   IconButton,
   Divider,
+  Button,
+  Modal,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
 } from "@mui/material";
 import {
   Home,
@@ -26,32 +33,106 @@ import {
   Videocam,
   Search,
 } from "@mui/icons-material";
-import { useGetUserListQuery } from "../../services/userList";
+import {
+  // useDataExceptLoggedInuserQuery,
+  useGetUserListQuery,
+} from "../../services/userList";
 import styles from "./ChatApp.module.css";
-import { useGetGroupListQuery } from "../../services/groupList";
+import {
+  useCreateGroupMutation,
+  useGetGroupListQuery,
+  useGetGroupMessagesQuery,
+} from "../../services/groupList";
+import {
+  useCreateMessageMutation,
+  useGetMessagesQuery,
+} from "../../services/userMessages";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 const ChatApp = () => {
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [message, setMessage] = useState("");
+  const [selectedChat, setSelectedChat] = useState<number | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
+  const [message, setMessage] = useState<string>("");
+  const [userid, setUserId] = useState<number | null>(null);
 
   const { data } = useGetUserListQuery();
-  const { data: groupList } = useGetGroupListQuery()
   const userList = data?.data;
+
+  const { data: groupList } = useGetGroupListQuery();
   const groupListData = groupList?.data;
 
+  const [CreateMessage] = useCreateMessageMutation();
 
-  const messages = [
-    { sender: "other", text: "Hey There!", time: "8:30pm" },
-    { sender: "other", text: "How are you?", time: "8:30pm" },
-    { sender: "me", text: "Hello!", time: "8:33pm" },
-    { sender: "me", text: "I am fine and how are you?", time: "8:34pm" },
-    {
-      sender: "other",
-      text: "I am doing well, Can we meet tomorrow?",
-      time: "8:36pm",
-    },
-    { sender: "me", text: "Yes Sure!", time: "8:58pm" },
-  ];
+  // Fetch User Messages
+  const { data: chatMessages } = useGetMessagesQuery(
+    userid !== null && selectedChat !== null
+      ? { sendid: userid, revid: selectedChat }
+      : skipToken
+  );
+
+  // Fetch Group Messages
+  const { data: groupMessages } = useGetGroupMessagesQuery(
+    selectedGroup !== null ? selectedGroup : skipToken
+  );
+  const filterGroupMessages = groupMessages?.data;
+  const groupChatMessages = filterGroupMessages?.[0].messages;
+
+  const allChatMessages = selectedGroup
+    ? groupChatMessages
+    : chatMessages?.data;
+
+  React.useEffect(() => {
+    const storedId = Number(localStorage.getItem("id"));
+    if (!isNaN(storedId)) {
+      setUserId(storedId);
+    }
+  }, []);
+
+  const sendMessage = async () => {
+    if (!message.trim() || userid === null || (!selectedChat && !selectedGroup))
+      return;
+
+    const data = {
+      content: message,
+      userId: userid,
+      receiverId: selectedChat,
+    };
+  };
+
+  const handleSelectUser = (userId: number) => {
+    setSelectedChat(userId);
+    setSelectedGroup(null); // Deselect any selected group
+  };
+
+  const handleSelectGroup = (groupId: number) => {
+    setSelectedGroup(groupId);
+    setSelectedChat(null); // Deselect any selected user
+  };
+
+  
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [groupName, setGroupName] = useState<string>("");
+  const [groupType, setGroupType] = useState("public"); // Default selection
+  
+  // const handleOpen = () => setOpenModal(true);
+  const handleClose = () => setOpenModal(false);
+
+  // name : string,
+  // type: string,
+  // adminId : number,
+  const [createGroup] = useCreateGroupMutation();
+
+  const creategroup = async () => {
+    try {
+      const data = { name: groupName, type: groupType, adminId: userid };
+      const response = await createGroup(data).unwrap(); 
+      console.log("Group Created:", response);
+      setOpenModal(false);
+    } catch (error) {
+      console.error("Error creating group:", error);
+      setOpenModal(false);
+    }
+  };
 
   return (
     <Grid container className={styles.container}>
@@ -82,42 +163,62 @@ const ChatApp = () => {
           placeholder="Search"
           size="small"
         />
+
         <Typography variant="h6">Groups</Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setOpenModal(true)}
+        >
+          Create Group
+        </Button>
+
         <List>
-          {groupListData && groupListData.map((group, index) => (
-            <ListItem key={index} button>
-              <ListItemText primary={group.name} secondary={group.type} />
-            </ListItem>
-          ))}
+          {groupListData &&
+            groupListData.map((group) => (
+              <ListItem
+                key={group.id}
+                button
+                onClick={() => handleSelectGroup(group.id)}
+              >
+                <ListItemText primary={group.name} secondary={group.type} />
+              </ListItem>
+            ))}
         </List>
+
         <Typography variant="h6">People</Typography>
         <List className={styles.peopleList}>
-          {userList && userList.map((person, index) => (
-            <ListItem
-              key={index}
-              button
-              onClick={() => setSelectedChat(person)}
-            >
-              <ListItemAvatar>
-                <Avatar />
-              </ListItemAvatar>
-              <ListItemText
-                primary={person.name}
-                secondary={person.lastMessage}
-              />
-            </ListItem>
-          ))}
+          {userList &&
+            userList.map((person) => (
+              <ListItem
+                key={person.id}
+                button
+                onClick={() => handleSelectUser(person.id)}
+              >
+                <ListItemAvatar>
+                  <Avatar />
+                </ListItemAvatar>
+                <ListItemText primary={person.name} />
+              </ListItem>
+            ))}
         </List>
       </Grid>
 
       {/* Chat Box */}
       <Grid item xs={8.2} className={styles.chatbox}>
-        {selectedChat ? (
+        {selectedChat || selectedGroup ? (
           <>
             {/* Chat Header */}
             <Paper elevation={3} className={styles.chatHeader}>
               <Avatar />
-              <Typography variant="h6">{selectedChat.name}</Typography>
+              <Typography variant="h6">
+                {selectedChat
+                  ? userList?.find((user) => user.id === selectedChat)?.name
+                  : selectedGroup
+                  ? groupListData?.find((group) => group.id === selectedGroup)
+                      ?.name
+                  : ""}
+              </Typography>
               <Box>
                 <IconButton>
                   <Call />
@@ -133,16 +234,19 @@ const ChatApp = () => {
 
             {/* Chat Messages */}
             <Box className={styles.messages}>
-              {messages.map((msg, index) => (
-                <Typography
-                  key={index}
-                  className={
-                    msg.sender === "me" ? styles.myMessage : styles.otherMessage
-                  }
-                >
-                  {msg.text} <span className={styles.time}>{msg.time}</span>
-                </Typography>
-              ))}
+              {allChatMessages &&
+                allChatMessages.map((msg, index) => (
+                  <Typography
+                    key={index}
+                    className={
+                      msg.userId === userid || msg.groupId === selectedGroup
+                        ? styles.myMessage
+                        : styles.otherMessage
+                    }
+                  >
+                    {msg.content}
+                  </Typography>
+                ))}
             </Box>
 
             {/* Chat Input */}
@@ -160,7 +264,7 @@ const ChatApp = () => {
               <IconButton>
                 <Mic />
               </IconButton>
-              <IconButton>
+              <IconButton onClick={sendMessage}>
                 <Send />
               </IconButton>
             </Paper>
@@ -171,6 +275,52 @@ const ChatApp = () => {
           </Typography>
         )}
       </Grid>
+
+      {/* Create Group Modal */}
+      <Modal open={openModal} onClose={handleClose}>
+        <Box className={styles.modalBox}>
+          <Typography variant="h6">Create New Group</Typography>
+          <TextField
+            fullWidth
+            label="Group Name"
+            variant="outlined"
+            margin="normal"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+          />
+          <FormControl component="fieldset" className={styles.radioGroup}>
+            <FormLabel component="legend">Group Type</FormLabel>
+            <RadioGroup
+              row
+              value={groupType}
+              onChange={(e) => setGroupType(e.target.value)}
+            >
+              <FormControlLabel
+                value="public"
+                control={<Radio />}
+                label="Public"
+              />
+              <FormControlLabel
+                value="private"
+                control={<Radio />}
+                label="Private"
+              />
+            </RadioGroup>
+          </FormControl>
+          <Box className={styles.button}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={creategroup}
+            >
+              Create
+            </Button>
+            <Button variant="outlined" color="primary" onClick={handleClose}>
+              Cancel
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </Grid>
   );
 };

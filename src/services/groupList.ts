@@ -1,38 +1,46 @@
-import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react"
-// import { RootState } from "../store/store"
-import { ApiResponse, User } from "../types";
-import { useAppSelector } from "../store/store";
-
+import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
+import { ApiResponse, Group, User } from "../types";
+import { RootState } from "../store/store"; // Import RootState
 
 const baseUrl = import.meta.env.VITE_SERVER_URL;
-const getUserId = () => {
-    const { userId } = useAppSelector((state) => state.auth);
-    return userId;
-};
-
 
 export const groupList = createApi({
-    reducerPath: 'groupListApi',
+    reducerPath: "groupListApi",
     baseQuery: fetchBaseQuery({
         baseUrl: baseUrl,
-        // prepareHeaders: (headers, { getState }) => {
-        //     const token = (getState() as RootState).auth.accessToken;
-        //     if (token) {
-        //         headers.set("Authorization", `Bearer ${token}`);
-        //     }
-        //     return headers;
-        // },
-
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.accessToken;
+            if (token) {
+                headers.set("Authorization", `Bearer ${token}`);
+            }
+            return headers;
+        },
     }),
-        getGroupList: builder.query<ApiResponse<User[]> , void>({
-            query: () => ({
-               url: `/group/${getUserId()}`,
-                method: 'GET',
-            })
+    endpoints: (builder) => ({
+
+        createGroup: builder.mutation<ApiResponse<Group>, Group>({
+            query: (body) => ({
+              url: "/group/",
+              method: "POST",
+              body,
+            }),
+          }),
+          
+        getGroupList: builder.query<ApiResponse<User[]>, void>({
+            query: () => {
+                return {
+                    url: `/group/`,
+                    method: "GET",
+                };
+            },
         }),
-    
-})
+        getGroupMessages: builder.query<ApiResponse<[]>,  number>({
+                   query: (id) => ({
+                       url: `/message/${id}`,
+                       method: "GET",
+                   }),
+        }),
+    }),
+});
 
-
-
-export const { useGetGroupListQuery } = groupList;
+export const { useGetGroupListQuery , useGetGroupMessagesQuery , useCreateGroupMutation} = groupList;

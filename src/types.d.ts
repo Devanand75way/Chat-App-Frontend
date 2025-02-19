@@ -12,3 +12,15 @@ interface User {
     message: string;
   }
   
+
+  interface Message {
+    content : string,
+    userId : number,
+    receiverId : number,
+  }
+
+  interface Group {
+    name : string,
+    type: string,
+    adminId : number | null,
+  }
