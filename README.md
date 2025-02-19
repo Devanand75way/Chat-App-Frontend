@@ -1,50 +1,66 @@
-# React + TypeScript + Vite
+Chat App Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Overview
 
-Currently, two official plugins are available:
+This is the frontend for a real-time chat application built using React and Material-UI. It includes features like user authentication, group and private chats, a responsive UI, and toast notifications.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Features
 
-## Expanding the ESLint configuration
+🔹 Sidebar with navigation icons (Home, Chat, Settings, Profile)
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+🔹 Group and Private Chats
 
-- Configure the top-level `parserOptions` property like this:
+🔹 Create and Manage Groups
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+🔹 Real-time messaging UI
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+🔹 Toast notifications for actions
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+🔹 Dark-themed background with adjustable brightness
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+🔹 Material-UI design for a sleek and modern interface
+
+Tech Stack
+
+React (Vite setup)
+
+Material-UI (for UI components)
+
+React Toastify (for notifications)
+
+Redux Toolkit (for state management)
+
+Axios (for API calls)
+
+Installation & Setup
+
+Prerequisites
+
+Node.js & npm installed
+
+Steps
+
+Clone the repository:
+
+git clone https://github.com/yourusername/chat-app-frontend.git
+cd chat-app-frontend
+
+Install dependencies:
+
+npm install
+
+Start the development server:
+
+npm run dev
+
+Usage
+
+Login/Register (if authentication is implemented)
+
+Click on "Create Group" to open the modal and create a new group
+
+Select a user or group to start chatting
+
+Send messages using the chat input
+
+Receive toast notifications for actions like group creation

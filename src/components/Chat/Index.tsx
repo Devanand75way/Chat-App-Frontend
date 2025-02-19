@@ -48,6 +48,7 @@ import {
   useGetMessagesQuery,
 } from "../../services/userMessages";
 import { skipToken } from "@reduxjs/toolkit/query";
+import { toast } from "react-toastify";
 
 const ChatApp = () => {
   const [selectedChat, setSelectedChat] = useState<number | null>(null);
@@ -89,14 +90,17 @@ const ChatApp = () => {
   }, []);
 
   const sendMessage = async () => {
-    if (!message.trim() || userid === null || (!selectedChat && !selectedGroup))
-      return;
+    if (!message?.trim()) return; // Prevent sending empty messages
 
-    const data = {
-      content: message,
-      userId: userid,
-      receiverId: selectedChat,
-    };
+    if (userid === null || selectedChat === null) return;
+    const data = { content: message, userId: userid, receiverId: selectedChat };
+
+    try {
+      await CreateMessage(data);
+      setMessage("");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleSelectUser = (userId: number) => {
@@ -125,8 +129,8 @@ const ChatApp = () => {
   const creategroup = async () => {
     try {
       const data = { name: groupName, type: groupType, adminId: userid };
-      const response = await createGroup(data).unwrap(); 
-      console.log("Group Created:", response);
+      await createGroup(data).unwrap(); 
+      toast.success("Group created")
       setOpenModal(false);
     } catch (error) {
       console.error("Error creating group:", error);
@@ -181,7 +185,10 @@ const ChatApp = () => {
                 button
                 onClick={() => handleSelectGroup(group.id)}
               >
-                <ListItemText primary={group.name} secondary={group.type} />
+                <ListItemAvatar>
+                  <Avatar src="https://i.pravatar.cc/100" className={styles.profile}/>
+                </ListItemAvatar>
+                <ListItemText primary={group.name} />
               </ListItem>
             ))}
         </List>
@@ -196,7 +203,7 @@ const ChatApp = () => {
                 onClick={() => handleSelectUser(person.id)}
               >
                 <ListItemAvatar>
-                  <Avatar />
+                  <Avatar src="https://i.pravatar.cc/100" className={styles.profile} />
                 </ListItemAvatar>
                 <ListItemText primary={person.name} />
               </ListItem>
@@ -211,7 +218,7 @@ const ChatApp = () => {
             {/* Chat Header */}
             <Paper elevation={3} className={styles.chatHeader}>
               <Avatar />
-              <Typography variant="h6">
+              <Typography variant="h6" >
                 {selectedChat
                   ? userList?.find((user) => user.id === selectedChat)?.name
                   : selectedGroup
